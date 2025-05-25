@@ -1,7 +1,7 @@
 <template>
     <nav>
-        <div><strong>Afiliados PRO</strong></div>
-        <div>
+        <div class="logo"><strong>Afiliados PRO</strong></div>
+        <div class="links">
             <RouterLink to="/" exact-active-class="active">Inicio</RouterLink>
             <RouterLink to="/links" exact-active-class="active">Bonos</RouterLink>
             <RouterLink to="/contact" exact-active-class="active">Contacto</RouterLink>
@@ -13,36 +13,27 @@
 
 <style scoped>
 nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    padding: 1rem;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background-color: #fff;
     border-bottom: 1px solid #eee;
-    flex-wrap: wrap;
 }
 
-nav a {
-    margin-right: 1rem;
-    font-weight: 500;
-    color: #333;
+.logo {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.links a {
+    margin: 0 1rem;
     text-decoration: none;
+    color: #333;
+    font-weight: 500;
     transition: color 0.3s ease;
 }
 
-nav a.active,
-nav a:hover {
+.links a.active,
+.links a:hover {
     color: #2a7ae4;
-}
-
-@media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    nav a {
-        margin: 0.5rem 0;
-    }
 }
 </style>
