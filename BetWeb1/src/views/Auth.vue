@@ -1,37 +1,52 @@
 <template>
-    <section class="auth-wrapper">
-        <div class="auth-toggle">
-            <button :class="{ active: isLogin }" @click="isLogin = true">Iniciar Sesión</button>
-            <button :class="{ active: !isLogin }" @click="isLogin = false">Registrarse</button>
-        </div>
+    <section class="containerContacto">
+        <h1 class="tituloContacto">{{ isLogin ? 'Iniciar Sesión' : 'Registro' }}</h1>
+        <p class="textoContacto">
+            {{ isLogin ? 'Accede a tu cuenta para empezar a generar' : 'Crea tu cuenta para tener acceso a los links' }}
+        </p>
 
-        <form @submit.prevent="isLogin ? handleLogin() : handleRegister()">
+        <form @submit.prevent="handleSubmit" class="formulario">
             <div class="inputGroup" v-if="!isLogin">
-                <input type="text" placeholder=" " v-model="form.nombre" required />
-                <label>Nombre</label>
+                <input id="name" v-model="form.name" type="text" required placeholder=" " />
+                <label for="name">Nombre completo</label>
             </div>
 
             <div class="inputGroup">
-                <input type="email" placeholder=" " v-model="form.email" required />
-                <label>Email</label>
+                <input id="email" v-model="form.email" type="email" required placeholder=" " />
+                <label for="email">Correo electrónico</label>
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input type="number" placeholder=" " v-model="form.edad" required />
-                <label>Edad</label>
+                <input id="age" v-model="form.age" type="number" required placeholder=" " min="18" />
+                <label for="age">Edad</label>
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input type="text" placeholder=" " v-model="form.poblacion" required />
-                <label>Población</label>
+                <input id="postalCode" v-model="form.postalCode" type="text" required placeholder=" " pattern="\\d{5}"
+                    title="Código postal de 5 dígitos" />
+                <label for="postalCode">Código Postal</label>
+            </div>
+
+            <div class="inputGroup" v-if="!isLogin">
+                <input id="dni" v-model="form.dni" type="text" required placeholder=" " pattern="[0-9A-Za-z]{8,12}"
+                    title="DNI válido (8 a 12 caracteres)" />
+                <label for="dni">DNI</label>
             </div>
 
             <div class="inputGroup">
-                <input type="password" placeholder=" " v-model="form.password" required />
-                <label>Contraseña</label>
+                <input id="password" v-model="form.password" type="password" required placeholder=" " />
+                <label for="password">Contraseña</label>
             </div>
 
-            <button type="submit">{{ isLogin ? 'Entrar' : 'Registrarse' }}</button>
+            <button type="submit">
+                {{ isLogin ? 'Iniciar Sesión' : 'Registrarse' }}
+            </button>
+
+            <div class="toggle-login">
+                <span @click="toggleForm">
+                    {{ isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
+                </span>
+            </div>
         </form>
     </section>
 </template>
@@ -42,105 +57,172 @@ import { reactive, ref } from 'vue'
 const isLogin = ref(true)
 
 const form = reactive({
-    nombre: '',
+    name: '',
     email: '',
-    edad: '',
-    poblacion: '',
+    age: '',
+    postalCode: '',
+    dni: '',
     password: ''
 })
 
-function handleLogin() {
-    // Aquí harás la llamada a tu backend
-    console.log('Login:', form)
-    // Ejemplo: await axios.post('/api/login', form)
+function toggleForm() {
+    isLogin.value = !isLogin.value
+    form.name = ''
+    form.email = ''
+    form.age = ''
+    form.postalCode = ''
+    form.dni = ''
+    form.password = ''
 }
 
-function handleRegister() {
-    // Aquí harás la llamada a tu backend
-    console.log('Registro:', form)
-    // Ejemplo: await axios.post('/api/register', form)
+function handleSubmit() {
+    if (isLogin.value) {
+        alert(`🔐 Iniciando sesión con:\nCorreo: ${form.email}\nContraseña: ${form.password}`)
+    } else {
+        if (form.age < 18) {
+            alert('🚫 Debes tener al menos 18 años para registrarte.')
+            return
+        }
+        // Puedes agregar validación más avanzada para DNI y Código Postal si quieres aquí
+        alert(`✅ Registrando:\nNombre: ${form.name}\nCorreo: ${form.email}\nEdad: ${form.age}\nCódigo Postal: ${form.postalCode}\nDNI: ${form.dni}`)
+    }
 }
 </script>
 
 <style scoped>
-.auth-wrapper {
-    max-width: 500px;
-    margin: auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+.containerContacto {
+    max-width: 600px;
+    margin: 3rem auto 7rem;
+    padding: 1.5rem;
+    text-align: left;
+    background: #fff;
+    border-radius: 1rem;
+    border: 2px solid var(--color-primary);
 }
 
-.auth-toggle {
-    display: flex;
-    justify-content: center;
+.tituloContacto {
+    font-size: clamp(2rem, 2.5vw, 3rem);
+    color: var(--color-primary);
+    margin-top: -1rem;
     margin-bottom: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
 }
 
-.auth-toggle button {
-    padding: 0.8rem 1.5rem;
-    border: none;
-    background: #eee;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px 5px 0 0;
+.textoContacto {
+    margin-bottom: 2.5rem;
+    color: #4b5563;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
 
-.auth-toggle button.active {
-    background: #1d976c;
-    color: white;
-}
-
-.inputGroup {
-    margin-bottom: 1.2rem;
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
     position: relative;
 }
 
-.inputGroup input {
+.formulario .inputGroup {
+    position: relative;
     width: 100%;
-    padding: 0.9rem 0.8rem;
-    border: 2px solid #1d976c;
-    border-radius: 8px;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1.2rem 1rem 0.5rem 1rem;
     font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #f8f9ff;
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: inset 5px 5px 10px #d1d5db, inset -5px -5px 10px #ffffff;
+    resize: vertical;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    font-family: var(--font-family);
+}
+
+input:focus {
     outline: none;
-    background: #fdfdfd;
+    background: #fff;
+    box-shadow:
+        0 0 0 3px var(--color-primary),
+        inset 5px 5px 10px #b5b8c3,
+        inset -5px -5px 10px #ffffff;
 }
 
-.inputGroup label {
+label {
     position: absolute;
-    top: 50%;
-    left: 0.9rem;
-    transform: translateY(-50%);
-    color: #777;
-    background: white;
-    padding: 0 0.3rem;
-    transition: 0.2s ease;
-    font-size: 0.95rem;
+    left: 1rem;
+    top: 0.6rem;
+    color: #999;
+    font-weight: 500;
+    font-size: 1rem;
     pointer-events: none;
+    transition: all 0.3s ease;
+    background: transparent;
+    padding: 0 0.25rem;
+    user-select: none;
 }
 
-.inputGroup input:focus+label,
-.inputGroup input:not(:placeholder-shown)+label {
-    top: -0.6rem;
+input:focus+label,
+input:not(:placeholder-shown)+label {
+    top: 0.2rem;
     font-size: 0.8rem;
-    color: #1d976c;
+    color: var(--color-primary);
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 button[type="submit"] {
-    width: 100%;
-    padding: 0.8rem;
-    background: linear-gradient(to right, #32a74d, #1d976c);
-    color: white;
-    font-weight: bold;
-    font-size: 1.1rem;
+    align-self: flex-start;
+    padding: 0.85rem 2.25rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #32a74d, #1d976c);
     border: none;
-    border-radius: 30px;
+    border-radius: 1.25rem;
     cursor: pointer;
-    transition: transform 0.2s;
+    user-select: none;
+    transition:
+        background 0.4s ease,
+        color 0.4s ease,
+        box-shadow 0.3s ease;
+    box-shadow:
+        5px 5px 15px rgba(50, 167, 77, 0.3),
+        -5px -5px 15px rgba(255, 255, 255, 0.7);
 }
 
-button[type="submit"]:hover {
-    transform: scale(1.03);
+button[type="submit"]:hover,
+button[type="submit"]:focus {
+    background: linear-gradient(135deg, #1d976c, #32a74d);
+    color: #fff;
+}
+
+/* Estilos del texto toggle de login */
+.toggle-login {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.toggle-login span {
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-decoration: underline;
+}
+
+.toggle-login span:hover {
+    color: #32a74d;
 }
 </style>
