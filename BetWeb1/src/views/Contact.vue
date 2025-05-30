@@ -1,192 +1,214 @@
 <template>
-    <section class="contact-wrapper">
-        <h1>Contacto</h1>
-        <p>Síguenos o contáctanos a través de nuestras redes:</p>
+    <section class="containerContacto">
+        <h1 class="tituloContacto">{{ isLogin ? 'Iniciar Sesión' : 'Registro' }}</h1>
+        <p class="textoContacto">
+            {{ isLogin ? 'Accede a tu cuenta para empezar a generar' : 'Crea tu cuenta para tener acceso a los links' }}
+        </p>
 
-        <div class="links">
-            <a href="https://t.me/tu_telegram" target="_blank" rel="noopener" class="social-link">Telegram</a>
-            <a href="https://tiktok.com/@tu_cuenta" target="_blank" rel="noopener" class="social-link">TikTok</a>
-            <a href="https://instagram.com/tu_cuenta" target="_blank" rel="noopener" class="social-link">Instagram</a>
-        </div>
-
-        <form @submit.prevent="sendEmail" class="contact-form">
-            <h2>¿Quieres crear tu propio negocio de afiliación?</h2>
-
-            <div class="inputGroup">
-                <input type="text" id="name" v-model="form.name" placeholder=" " required />
-                <label for="name">Nombre</label>
+        <form @submit.prevent="handleSubmit" class="formulario">
+            <div class="inputGroup" v-if="!isLogin">
+                <input id="name" v-model="form.name" type="text" required placeholder=" " />
+                <label for="name">Nombre completo</label>
             </div>
 
             <div class="inputGroup">
-                <input type="text" id="social" v-model="form.social" placeholder=" " />
-                <label for="social">Redes sociales (Telegram, Instagram...)</label>
+                <input id="email" v-model="form.email" type="email" required placeholder=" " />
+                <label for="email">Correo electrónico</label>
+            </div>
+
+            <div class="inputGroup" v-if="!isLogin">
+                <input id="age" v-model="form.age" type="number" required placeholder=" " min="18" />
+                <label for="age">Edad</label>
+            </div>
+
+            <div class="inputGroup" v-if="!isLogin">
+                <input id="city" v-model="form.city" type="text" required placeholder=" " />
+                <label for="city">Población</label>
             </div>
 
             <div class="inputGroup">
-                <input type="email" id="email" v-model="form.email" placeholder=" " required />
-                <label for="email">Correo Electrónico</label>
+                <input id="password" v-model="form.password" type="password" required placeholder=" " />
+                <label for="password">Contraseña</label>
             </div>
 
-            <div class="inputGroup">
-                <textarea id="message" v-model="form.message" placeholder=" " rows="4" required></textarea>
-                <label for="message">Mensaje</label>
-            </div>
+            <button type="submit">
+                {{ isLogin ? 'Iniciar Sesión' : 'Registrarse' }}
+            </button>
 
-            <button type="submit" class="btnContacto">Enviar Mensaje</button>
+            <div class="toggle-login">
+                <span @click="toggleForm">
+                    {{ isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
+                </span>
+            </div>
         </form>
     </section>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+
+const isLogin = ref(true)
 
 const form = reactive({
     name: '',
-    social: '',
     email: '',
-    message: ''
+    age: '',
+    city: '',
+    password: ''
 })
 
-function sendEmail() {
-    const subject = encodeURIComponent('Interesado en crear negocio de afiliación')
-    const body = encodeURIComponent(
-        `Nombre: ${form.name}\n` +
-        `Redes sociales: ${form.social}\n` +
-        `Correo: ${form.email}\n\n` +
-        `Mensaje:\n${form.message}`
-    )
+function toggleForm() {
+    isLogin.value = !isLogin.value
+    form.name = ''
+    form.email = ''
+    form.age = ''
+    form.city = ''
+    form.password = ''
+}
 
-    window.location.href = `mailto:betzoneone@gmail.com?subject=${subject}&body=${body}`
+function handleSubmit() {
+    if (isLogin.value) {
+        alert(`🔐 Iniciando sesión con:\nCorreo: ${form.email}\nContraseña: ${form.password}`)
+    } else {
+        alert(`✅ Registrando:\nNombre: ${form.name}\nCorreo: ${form.email}\nEdad: ${form.age}\nPoblación: ${form.city}`)
+    }
 }
 </script>
 
 <style scoped>
-.contact-wrapper {
+.containerContacto {
     max-width: 600px;
-    margin: 2rem auto;
-    padding: 1rem 2rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: center;
-}
-
-h1 {
-    font-size: 2.5rem;
-    background: linear-gradient(to right, #1d976c, #93f9b9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-}
-
-p {
-    font-size: 1.1rem;
-    color: #444;
-    margin-bottom: 1.5rem;
-}
-
-.links {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.social-link {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #32a74d, #1d976c);
-    color: white;
-    font-weight: 700;
-    font-size: 1.3rem;
-    border-radius: 30px;
-    text-decoration: none;
-    min-width: 140px;
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.social-link:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.contact-form {
-    background: white;
-    padding: 2rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    margin: 3rem auto 7rem;
+    padding: 1.5rem;
     text-align: left;
+    background: #fff;
+    border-radius: 1rem;
+    border: 2px solid var(--color-primary);
 }
 
-.contact-form h2 {
-    color: #1d976c;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.inputGroup {
-    position: relative;
+.tituloContacto {
+    font-size: clamp(2rem, 2.5vw, 3rem);
+    color: var(--color-primary);
+    margin-top: -1rem;
     margin-bottom: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
 }
 
-.inputGroup input,
-.inputGroup textarea {
+.textoContacto {
+    margin-bottom: 2.5rem;
+    color: #4b5563;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: relative;
+}
+
+.formulario .inputGroup {
+    position: relative;
     width: 100%;
-    padding: 0.9rem 0.8rem;
-    border: 2px solid #1d976c;
-    border-radius: 8px;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1.2rem 1rem 0.5rem 1rem;
     font-size: 1rem;
-    outline: none;
-    background: #fdfdfd;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.inputGroup input:focus,
-.inputGroup textarea:focus {
-    border-color: #32a74d;
-    box-shadow: 0 0 0 3px rgba(50, 167, 77, 0.15);
-}
-
-.inputGroup label {
-    position: absolute;
-    top: 50%;
-    left: 0.9rem;
-    transform: translateY(-50%);
-    color: #777;
-    pointer-events: none;
-    transition: 0.2s ease;
-    background: white;
-    padding: 0 0.3rem;
-    font-size: 0.95rem;
-}
-
-.inputGroup input:focus+label,
-.inputGroup input:not(:placeholder-shown)+label,
-.inputGroup textarea:focus+label,
-.inputGroup textarea:not(:placeholder-shown)+label {
-    top: -0.6rem;
-    font-size: 0.8rem;
-    color: #1d976c;
-}
-
-button[type="submit"],
-.btnContacto {
-    width: 100%;
-    padding: 0.8rem;
-    background: linear-gradient(to right, #32a74d, #1d976c);
-    color: white;
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #f8f9ff;
     border: none;
-    border-radius: 30px;
+    border-radius: 0.75rem;
+    box-shadow: inset 5px 5px 10px #d1d5db, inset -5px -5px 10px #ffffff;
+    resize: vertical;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    font-family: var(--font-family);
+}
+
+input:focus {
+    outline: none;
+    background: #fff;
+    box-shadow:
+        0 0 0 3px var(--color-primary),
+        inset 5px 5px 10px #b5b8c3,
+        inset -5px -5px 10px #ffffff;
+}
+
+label {
+    position: absolute;
+    left: 1rem;
+    top: 0.6rem;
+    color: #999;
+    font-weight: 500;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: transparent;
+    padding: 0 0.25rem;
+    user-select: none;
+}
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+    top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+button[type="submit"] {
+    align-self: flex-start;
+    padding: 0.85rem 2.25rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #32a74d, #1d976c);
+    border: none;
+    border-radius: 1.25rem;
     cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
+    user-select: none;
+    transition:
+        background 0.4s ease,
+        color 0.4s ease,
+        box-shadow 0.3s ease;
+    box-shadow:
+        5px 5px 15px rgba(50, 167, 77, 0.3),
+        -5px -5px 15px rgba(255, 255, 255, 0.7);
 }
 
 button[type="submit"]:hover,
-.btnContacto:hover {
-    transform: scale(1.03);
-    background: linear-gradient(to right, #1d976c, #32a74d);
+button[type="submit"]:focus {
+    background: linear-gradient(135deg, #1d976c, #32a74d);
+    color: #fff;
+}
+
+/* Estilos del texto toggle de login */
+.toggle-login {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.toggle-login span {
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-decoration: underline;
+}
+
+.toggle-login span:hover {
+    color: #32a74d;
 }
 </style>

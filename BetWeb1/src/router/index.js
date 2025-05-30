@@ -3,12 +3,14 @@ import Home from '../views/Home.vue'
 import Links from '../views/Links.vue'
 import Contact from '../views/Contact.vue'
 import Manual from '../views/Manual.vue'
+import Auth from '../views/Auth.vue'
 
 const routes = [
     { path: '/', name: 'Home', component: Home },
     { path: '/links', name: 'Links', component: Links },
     { path: '/contact', name: 'Contact', component: Contact },
-    { path: '/manual', name: 'Manual', component: Manual }, // 👈 Ruta añadida
+    { path: '/manual', name: 'Manual', component: Manual },
+    { path: '/auth', name: 'Auth', component: Auth }, // ✅ Ruta para login/register
 ]
 
 const router = createRouter({

@@ -17,18 +17,50 @@
                 <RouterLink to="/links" exact-active-class="active">Bonos</RouterLink>
                 <RouterLink to="/contact" exact-active-class="active">Contacto</RouterLink>
             </div>
+
+            <div class="user-section">
+                <template v-if="user">
+                    <span class="user-name">Hola, {{ user.nombre }}</span>
+                    <button @click="logout" class="logout-button">Salir</button>
+                </template>
+                <template v-else>
+                    <RouterLink to="/auth" class="login-link" title="Iniciar sesión o registrarse">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 10a1 1 0 011-1h8.586l-2.293-2.293a1 1 0 111.414-1.414l4.586 4.586a1 1 0 010 1.414l-4.586 4.586a1 1 0 11-1.414-1.414L12.586 11H4a1 1 0 01-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </RouterLink>
+                </template>
+            </div>
         </div>
     </nav>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const isOpen = ref(false)
+const user = ref(null)
+const router = useRouter()
 
 function toggleMenu() {
     isOpen.value = !isOpen.value
 }
+
+function logout() {
+    localStorage.removeItem('user')
+    user.value = null
+    router.push('/auth')
+}
+
+onMounted(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+        user.value = JSON.parse(storedUser)
+    }
+})
 </script>
 
 <style scoped>
@@ -121,6 +153,43 @@ function toggleMenu() {
     transform: rotate(-45deg) translateY(-8px);
 }
 
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1d976c;
+}
+
+.logout-button {
+    padding: 0.4rem 0.8rem;
+    background: #1d976c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.logout-button:hover {
+    background: #32a74d;
+}
+
+.login-link {
+    color: #1d976c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
 @media (max-width: 768px) {
     .menu-icon {
         display: flex;
@@ -141,6 +210,11 @@ function toggleMenu() {
 
     .links a {
         padding: 0.5rem 0;
+    }
+
+    .user-section {
+        margin-top: 1rem;
+        justify-content: flex-end;
     }
 }
 </style>
