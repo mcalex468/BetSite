@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <div class="logo"><strong>Afiliados PRO</strong></div>
+        <div class="logo"><strong>Bet Zone</strong></div>
         <div class="links">
             <RouterLink to="/" exact-active-class="active">Inicio</RouterLink>
             <RouterLink to="/links" exact-active-class="active">Bonos</RouterLink>
