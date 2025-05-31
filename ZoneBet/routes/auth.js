@@ -1,41 +1,59 @@
-const express = require('express')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const db = require('../db')
+import express from 'express'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import pool from '../db.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const router = express.Router()
 
-// REGISTRO
+// Registro
 router.post('/register', async (req, res) => {
-    const { name, email, password, age, dni, postalCode } = req.body
-
-    if (Number(age) < 18) return res.status(400).json({ error: 'Debes ser mayor de edad.' })
-
-    const userExists = await db.query('SELECT * FROM users WHERE email = $1', [email])
-    if (userExists.rows.length > 0) return res.status(400).json({ error: 'Ya existe ese correo.' })
-
-    const hash = await bcrypt.hash(password, 10)
-    await db.query(
-        `INSERT INTO users(name, email, password, age, dni, postal_code) VALUES($1, $2, $3, $4, $5, $6)`,
-        [name, email, hash, age, dni, postalCode]
-    )
-
-    res.json({ success: true, message: 'Registrado correctamente.' })
+    const { name, email, age, city, dni, password } = req.body
+    if (!name || !email || !age || !city || !dni || !password) {
+        return res.status(400).json({ error: 'Faltan datos requeridos' })
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10)
+        const query = `
+      INSERT INTO users (name, email, age, city, dni, password)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, email, name
+    `
+        const values = [name, email, age, city, dni, hashedPassword]
+        const { rows } = await pool.query(query, values)
+        res.status(201).json({ message: 'Usuario registrado', user: rows[0] })
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'Email o DNI ya registrado' })
+        }
+        console.error(error)
+        res.status(500).json({ error: 'Error en el servidor' })
+    }
 })
 
-// LOGIN
+// Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body
-    const user = await db.query('SELECT * FROM users WHERE email = $1', [email])
-
-    if (user.rows.length === 0) return res.status(400).json({ error: 'Usuario no encontrado' })
-
-    const valid = await bcrypt.compare(password, user.rows[0].password)
-    if (!valid) return res.status(400).json({ error: 'Contraseña incorrecta' })
-
-    const token = jwt.sign({ id: user.rows[0].id, email }, process.env.JWT_SECRET, { expiresIn: '2h' })
-
-    res.json({ success: true, token, user: { name: user.rows[0].name, email } })
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Faltan email o contraseña' })
+    }
+    try {
+        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email])
+        const user = rows[0]
+        if (!user) return res.status(401).json({ error: 'Credenciales inválidas' })
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) return res.status(401).json({ error: 'Credenciales inválidas' })
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '2h' }
+        )
+        res.json({ message: 'Login exitoso', token })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: 'Error en el servidor' })
+    }
 })
 
-module.exports = router
+export default router

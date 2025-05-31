@@ -6,35 +6,39 @@
         </p>
 
         <form @submit.prevent="handleSubmit" class="formulario">
+            <!-- Solo para registro -->
             <div class="inputGroup" v-if="!isLogin">
-                <input id="name" v-model="form.name" type="text" required placeholder=" " />
+                <input id="name" v-model="form.name" type="text" placeholder=" " />
                 <label for="name">Nombre completo</label>
             </div>
 
             <div class="inputGroup">
-                <input id="email" v-model="form.email" type="email" required placeholder=" " />
+                <input id="email" v-model="form.email" type="email" placeholder=" " />
                 <label for="email">Correo electrónico</label>
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input id="age" v-model="form.age" type="number" required placeholder=" " min="18" />
+                <input id="age" v-model.number="form.age" type="number" placeholder=" " />
                 <label for="age">Edad</label>
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input id="postalCode" v-model="form.postalCode" type="text" required placeholder=" " pattern="\\d{5}"
-                    title="Código postal de 5 dígitos" />
+                <input id="postalCode" v-model="form.postalCode" type="text" placeholder=" " />
                 <label for="postalCode">Código Postal</label>
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input id="dni" v-model="form.dni" type="text" required placeholder=" " pattern="[0-9A-Za-z]{8,12}"
-                    title="DNI válido (8 a 12 caracteres)" />
+                <input id="city" v-model="form.city" type="text" placeholder=" " />
+                <label for="city">Ciudad</label>
+            </div>
+
+            <div class="inputGroup" v-if="!isLogin">
+                <input id="dni" v-model="form.dni" type="text" placeholder=" " />
                 <label for="dni">DNI</label>
             </div>
 
             <div class="inputGroup">
-                <input id="password" v-model="form.password" type="password" required placeholder=" " />
+                <input id="password" v-model="form.password" type="password" placeholder=" " />
                 <label for="password">Contraseña</label>
             </div>
 
@@ -52,7 +56,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 const isLogin = ref(true)
 
@@ -61,30 +65,104 @@ const form = reactive({
     email: '',
     age: '',
     postalCode: '',
+    city: '',
     dni: '',
     password: ''
 })
 
 function toggleForm() {
     isLogin.value = !isLogin.value
-    form.name = ''
-    form.email = ''
-    form.age = ''
-    form.postalCode = ''
-    form.dni = ''
-    form.password = ''
+    Object.keys(form).forEach(key => {
+        form[key] = ''
+    })
 }
 
-function handleSubmit() {
-    if (isLogin.value) {
-        alert(`🔐 Iniciando sesión con:\nCorreo: ${form.email}\nContraseña: ${form.password}`)
-    } else {
-        if (form.age < 18) {
-            alert('🚫 Debes tener al menos 18 años para registrarte.')
-            return
+async function handleSubmit() {
+    try {
+        if (isLogin.value) {
+            // LOGIN
+            if (!form.email.trim() || !form.password.trim()) {
+                alert('🚫 Por favor, ingresa correo y contraseña para iniciar sesión.')
+                return
+            }
+
+            const res = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: form.email.trim(),
+                    password: form.password.trim()
+                })
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                alert('✅ Login exitoso: ' + data.message)
+                // Guardar token o redirigir aquí
+            } else {
+                alert('🚫 Error en login: ' + data.error)
+            }
+        } else {
+            // REGISTRO
+
+            // Validaciones
+            if (!form.name.trim()) {
+                alert('🚫 El nombre completo es obligatorio.')
+                return
+            }
+            if (!form.email.trim()) {
+                alert('🚫 El correo electrónico es obligatorio.')
+                return
+            }
+            const age = Number(form.age)
+            if (!age || age < 18) {
+                alert('🚫 Debes tener al menos 18 años para registrarte.')
+                return
+            }
+            if (!form.postalCode.trim() || !/^\d{5}$/.test(form.postalCode)) {
+                alert('🚫 El código postal debe tener 5 dígitos.')
+                return
+            }
+            if (!form.city.trim()) {
+                alert('🚫 La ciudad es obligatoria.')
+                return
+            }
+            if (!form.dni.trim() || !/^[0-9A-Za-z]{8,12}$/.test(form.dni)) {
+                alert('🚫 El DNI debe tener entre 8 y 12 caracteres alfanuméricos.')
+                return
+            }
+            if (!form.password.trim()) {
+                alert('🚫 La contraseña es obligatoria.')
+                return
+            }
+
+            const res = await fetch('http://localhost:3000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: form.name.trim(),
+                    email: form.email.trim(),
+                    age: age,
+                    postalCode: form.postalCode.trim(),
+                    city: form.city.trim(),
+                    dni: form.dni.trim(),
+                    password: form.password.trim()
+                })
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                alert('✅ Registro exitoso: ' + data.message)
+                toggleForm()
+            } else {
+                alert('🚫 Error en registro: ' + data.error)
+            }
         }
-        // Puedes agregar validación más avanzada para DNI y Código Postal si quieres aquí
-        alert(`✅ Registrando:\nNombre: ${form.name}\nCorreo: ${form.email}\nEdad: ${form.age}\nCódigo Postal: ${form.postalCode}\nDNI: ${form.dni}`)
+    } catch (error) {
+        alert('❌ Error de conexión con el servidor')
+        console.error(error)
     }
 }
 </script>
