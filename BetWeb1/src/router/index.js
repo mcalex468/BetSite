@@ -10,7 +10,10 @@ const routes = [
     { path: '/links', name: 'Links', component: Links },
     { path: '/contact', name: 'Contact', component: Contact },
     { path: '/manual', name: 'Manual', component: Manual },
-    { path: '/auth', name: 'Auth', component: Auth }, // ✅ Ruta para login/register
+    { path: '/auth', name: 'Auth', component: Auth },
+    { path: '/register', redirect: '/auth' },
+    { path: '/login', redirect: '/auth' },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 const router = createRouter({
