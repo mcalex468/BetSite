@@ -14,13 +14,18 @@
             <div :class="['links', { open: isOpen }]">
                 <RouterLink to="/" exact-active-class="active">Inicio</RouterLink>
                 <RouterLink to="/manual" exact-active-class="active">Manual</RouterLink>
-                <RouterLink to="/links" exact-active-class="active">Bonos</RouterLink>
                 <RouterLink to="/contact" exact-active-class="active">Contacto</RouterLink>
+                <template v-if="user">
+                    <RouterLink to="/links" exact-active-class="active">Bonos</RouterLink>
+                    <RouterLink to="/dashboard" exact-active-class="active">Dashboard</RouterLink>
+                </template>
             </div>
 
             <div class="user-section">
                 <template v-if="user">
-                    <span class="user-name">Hola, {{ user.nombre }}</span>
+                    <RouterLink to="/dashboard" class="user-name" title="Ir al Dashboard">
+                        {{ user.name }}
+                    </RouterLink>
                     <button @click="logout" class="logout-button">Salir</button>
                 </template>
                 <template v-else>
@@ -51,15 +56,38 @@ function toggleMenu() {
 
 function logout() {
     localStorage.removeItem('user')
+    localStorage.removeItem('token')
     user.value = null
     router.push('/auth')
 }
 
-onMounted(() => {
+// Carga inicial de usuario
+function loadUser() {
     const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-        user.value = JSON.parse(storedUser)
+    const token = localStorage.getItem('token')
+
+    if (storedUser && token) {
+        try {
+            user.value = JSON.parse(storedUser)
+        } catch {
+            user.value = null
+        }
+    } else {
+        user.value = null
     }
+}
+
+onMounted(() => {
+    loadUser()
+
+    // Escuchar evento para actualizar user cuando se loguea o registra
+    window.addEventListener('user-logged-in', loadUser)
+})
+
+// Para limpiar el listener al desmontar el componente
+import { onBeforeUnmount } from 'vue'
+onBeforeUnmount(() => {
+    window.removeEventListener('user-logged-in', loadUser)
 })
 </script>
 

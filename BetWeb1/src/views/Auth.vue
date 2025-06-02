@@ -18,7 +18,7 @@
             </div>
 
             <div class="inputGroup" v-if="!isLogin">
-                <input id="age" v-model.number="form.age" type="number" placeholder=" " />
+                <input id="age" v-model.number="form.age" type="number" placeholder=" " min="18" />
                 <label for="age">Edad</label>
             </div>
 
@@ -57,6 +57,8 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const isLogin = ref(true)
 
@@ -97,16 +99,28 @@ async function handleSubmit() {
 
             const data = await res.json()
 
+            console.log('Respuesta backend login:', data)  // <--- Aquí justo después de recibir data
+
+
             if (res.ok) {
                 alert('✅ Login exitoso: ' + data.message)
-                // Guardar token o redirigir aquí
+                // Guardar token y usuario
+                // auth, después de guardar en localStorage:
+                localStorage.setItem('user', JSON.stringify(data.user))
+                localStorage.setItem('token', data.token)
+
+                // Dispara el evento inmediatamente después
+                window.dispatchEvent(new Event('user-logged-in'))
+
+                router.push('/dashboard')
+
+
+
             } else {
                 alert('🚫 Error en login: ' + data.error)
             }
         } else {
             // REGISTRO
-
-            // Validaciones
             if (!form.name.trim()) {
                 alert('🚫 El nombre completo es obligatorio.')
                 return
@@ -155,7 +169,10 @@ async function handleSubmit() {
 
             if (res.ok) {
                 alert('✅ Registro exitoso: ' + data.message)
-                toggleForm()
+                // Limpiar formulario
+                Object.keys(form).forEach(key => form[key] = '')
+                // Cambiar a login
+                isLogin.value = true
             } else {
                 alert('🚫 Error en registro: ' + data.error)
             }
