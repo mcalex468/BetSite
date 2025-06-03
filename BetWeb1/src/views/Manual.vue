@@ -17,7 +17,7 @@
         </div>
 
         <div class="step-box">
-            <h2>PASO 2: ¿Qué son los links de referido?</h2>
+            <h2>PASO 2: ¿Qué son los links de afiliados?</h2>
             <p>
                 Te proporcionamos <strong>enlaces personalizados</strong> con los que podrás invitar a tus amigos o
                 seguidores a registrarse. Cada vez que alguien se registre y complete su apuesta a través de tu enlace,
